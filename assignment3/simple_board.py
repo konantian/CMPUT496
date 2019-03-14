@@ -1,3 +1,4 @@
+
 """
 simple_board.py
 
@@ -13,6 +14,8 @@ import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
                        MAXSIZE, NULLPOINT
+
+from gtp_connection import point_to_coord,format_point
 
 class SimpleGoBoard(object):
 
@@ -418,3 +421,31 @@ class SimpleGoBoard(object):
                 return True, BLACK
 
         return False, None
+
+
+    ##Assignment 3 starts here
+    def endOfGame(self):
+
+        end,player = self.check_game_end_gomoku()
+        return end
+
+    def legalMoves(self):
+        moves = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        gtp_moves = []
+        for move in moves:
+            coords = point_to_coord(move, self.board.size)
+            gtp_moves.append(format_point(coords))
+
+        return gtp_moves
+
+
+    def moveNumber(self):
+
+
+
+    def resetToMoveNumber(self):
+
+
+
+    def undoMove(self):
+

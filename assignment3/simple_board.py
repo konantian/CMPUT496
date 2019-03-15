@@ -72,6 +72,8 @@ class SimpleGoBoard(object):
         """
         assert 2 <= size <= MAXSIZE
         self.reset(size)
+        self.moves=[]
+        self.last_move = None
 
     def reset(self, size):
         """
@@ -89,6 +91,8 @@ class SimpleGoBoard(object):
         self.liberty_of = np.full(self.maxpoint, NULLPOINT, dtype = np.int32)
         self._initialize_empty_points(self.board)
         self._initialize_neighbors()
+        self.moves=[]
+        self.last_move = None
 
     def copy(self):
         b = SimpleGoBoard(self.size)
@@ -441,11 +445,20 @@ class SimpleGoBoard(object):
 
     def moveNumber(self):
 
+        return len(self.moves)
 
 
-    def resetToMoveNumber(self):
+    def resetToMoveNumber(self,moveNr):
 
-
+        numUndos = self.moveNumber() - moveNr
+        assert numUndos >= 0
+        for _ in range(numUndos):
+            self.undoMove()
+        assert self.moveNumber() == moveNr
 
     def undoMove(self):
+        location = self.moves.pop()
+        self.last_move = location
+        self.board[location] = EMPTY
+        self.current_player = GoBoardUtil.opponent(self.current_player)
 

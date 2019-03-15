@@ -354,6 +354,7 @@ class SimpleGoBoard(object):
         if self.board[point] != EMPTY:
             return False
         self.board[point] = color
+        self.last_move = point
         self.current_player = GoBoardUtil.opponent(color)
         return True
         

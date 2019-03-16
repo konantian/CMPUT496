@@ -4,6 +4,7 @@
 
 from gtp_connection import GtpConnection
 from board_util import GoBoardUtil,EMPTY, BLACK, WHITE
+from simple_board import SimpleGoBoard
 
 class SimulationPlayer(object):
     def __init__(self, numSimulations):
@@ -14,9 +15,8 @@ class SimulationPlayer(object):
     def name(self):
         return "Simulation Player ({0} sim.)".format(self.numSimulations)
 
-    def genmove(self, state,color):
+    def genmove(self, moves,state,color):
         assert not state.endOfGame()
-        moves = state.legalMoves()
         numMoves = len(moves)
         score = [0] * numMoves
         for i in range(numMoves):
@@ -27,11 +27,12 @@ class SimulationPlayer(object):
         best = moves[bestIndex]
         #print("Best move:", best, "score", score[best])
         assert best in state.legalMoves()
-        return best
+        coords = point_to_coord(best, state.size)
+        return format_point(coords)
 
-    def simulate(self, state, move, color):
+    def simulate(self, state, point, color):
         stats = [0] * 3
-        state.play_move_gomoku(move,color)
+        state.play_move_gomoku(point,color)
         moveNr = state.moveNumber()
         for _ in range(self.numSimulations):
             winner, _ = state.simulate()

@@ -29,6 +29,7 @@ class GtpConnection():
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.policy_type = "random"
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -49,7 +50,9 @@ class GtpConnection():
             "gogui-rules_side_to_move": self.gogui_rules_side_to_move_cmd,
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
-            "gogui-analyze_commands": self.gogui_analyze_cmd
+            "gogui-analyze_commands": self.gogui_analyze_cmd,
+            "policy_moves": self.policy_moves_cmd,
+            "policy": self.policy_cmd
         }
 
         # used for argument checking
@@ -63,6 +66,10 @@ class GtpConnection():
             "play": (2, 'Usage: play {b,w} MOVE'),
             "legal_moves": (1, 'Usage: legal_moves {w,b}')
         }
+        points = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        moves = self.legalMoves()
+        self.move_to_point=dict(zip(moves,points))
+        self.point_to_move=dict(zip(points,moves))
     
     def write(self, data):
         stdout.write(data) 
@@ -142,6 +149,10 @@ class GtpConnection():
         Reset the board to empty board of given size
         """
         self.board.reset(size)
+        points = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        moves = self.legalMoves()
+        self.move_to_point=dict(zip(moves,points))
+        self.point_to_move=dict(zip(points,moves))
 
     def board2d(self):
         return str(GoBoardUtil.get_twoD_board(self.board))
@@ -258,7 +269,7 @@ class GtpConnection():
             else:
                 self.respond("resign")
             return
-        move = self.go_engine.get_move(self.board, color)
+        move = self.go_engine.genmove(moves,self.board, color)
         if move == PASS:
             self.respond("pass")
             return
@@ -347,6 +358,74 @@ class GtpConnection():
                      "pstring/Show Board/gogui-rules_board\n"
                      )
 
+    ##Assignment 3 starts here
+    def legalMoves(self):
+        moves = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        gtp_moves = []
+        for move in moves:
+            coords = point_to_coord(move, self.board.size)
+            gtp_moves.append(format_point(coords))
+
+        return gtp_moves
+
+    def policy_cmd(self,args):
+        self.policy_type = args[0]
+
+    def policy_moves(self):
+
+        empty_moves = self.legalMoves()
+        if self.policy_type == "random":
+
+            return "Random ",empty_moves
+
+        elif self.policy_type == "rule_based":
+            win_moves=[]
+            block_win_moves=[]
+            open_four_moves=[]
+            block_open_four_moves=[]
+            steps = [1,self.board.NS,self.board.NS-1,self.board.NS+1]
+            for move in empty_moves:
+                for step in steps:
+                    point = self.move_to_point[move]
+                    if self.board.five_in_row(point,self.board.current_player,step):
+                        win_moves.append(move)
+                    elif self.board.five_in_row(point,GoBoardUtil.opponent(self.board.current_player),step):
+                        block_win_moves.append(move)
+                    elif self.board.four_in_row(point,self.board.current_player,step):
+                        open_four_moves.append(move)
+                    elif self.board.four_in_row(point,GoBoardUtil.opponent(self.board.current_player),step):
+                        block_open_four_moves.append(move)
+
+            if win_moves:
+
+                return "Win ",win_moves
+
+            elif block_win_moves:
+
+                return "BlockWin ",block_win_moves
+
+            elif open_four_moves:
+
+                return "OpenFour ",open_four_moves
+
+            elif block_open_four_moves:
+
+                return "BlockOpenFour ",block_open_four_moves
+
+            else:
+
+                return "Random ",empty_moves
+
+    def policy_moves_cmd(self,args):
+        
+        move_type,moves = self.policy_moves()
+        if moves:
+            move_as_string = ' '.join(sorted(moves))
+            self.respond(move_type+move_as_string)
+        else:
+            self.respond(" ")
+        return
+            
 def point_to_coord(point, boardsize):
     """
     Transform point given as board array index 

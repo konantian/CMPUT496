@@ -20,7 +20,10 @@ from gtp_connection import point_to_coord,format_point
 class SimpleGoBoard(object):
 
     def get_color(self, point):
-        return self.board[point]
+        try:
+            return self.board[point]
+        except:
+            return 3
 
     def pt(self, row, col):
         return coord_to_point(row, col, self.size)
@@ -435,14 +438,8 @@ class SimpleGoBoard(object):
         return end
 
     def legalMoves(self):
-        moves = GoBoardUtil.generate_legal_moves_gomoku(self)
-        gtp_moves = []
-        for move in moves:
-            coords = point_to_coord(move, self.size)
-            gtp_moves.append(format_point(coords))
 
-        return gtp_moves
-
+        return GoBoardUtil.generate_legal_moves_gomoku(self)
 
     def moveNumber(self):
 
@@ -462,4 +459,41 @@ class SimpleGoBoard(object):
         self.last_move = location
         self.board[location] = EMPTY
         self.current_player = GoBoardUtil.opponent(self.current_player)
+
+    def count(self,point,otherpoint,step):
+
+        if self.get_color(point) != self.get_color(otherpoint):
+            return 0
+        else:
+            return 1 + self.count(point,otherpoint+step,step)
+
+    def five_in_row(self,point,color,step):
+
+        self.board[point] = color
+        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
+        self.board[point] = EMPTY
+        
+        return True if total >= 4 else False
+
+
+    def check_empty(self,point,otherpoint,step):
+        if self.get_color(point) != self.get_color(otherpoint):
+            return otherpoint
+        else:
+            return self.check_empty(point,otherpoint+step,step)
+
+    def four_in_row(self,point,color,step):
+
+        self.board[point] = color
+        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
+        if total == 3:
+            emptyA=self.check_empty(point,point+step,step)
+            emptyB=self.check_empty(point,point-step,-step)
+            self.board[point] = EMPTY
+            if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
+                return True
+            elif (self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY) or (self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY):
+                return True
+        self.board[point] = EMPTY
+        return False
 

@@ -435,10 +435,10 @@ class SimpleGoBoard(object):
         return end
 
     def legalMoves(self):
-        moves = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        moves = GoBoardUtil.generate_legal_moves_gomoku(self)
         gtp_moves = []
         for move in moves:
-            coords = point_to_coord(move, self.board.size)
+            coords = point_to_coord(move, self.size)
             gtp_moves.append(format_point(coords))
 
         return gtp_moves

@@ -9,7 +9,7 @@ Implements a basic Go board with functions to:
 
 The board uses a 1-dimensional representation with padding
 """
-
+import random
 import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
@@ -357,6 +357,7 @@ class SimpleGoBoard(object):
         if self.board[point] != EMPTY:
             return False
         self.board[point] = color
+        self.moves.append(point)
         self.last_move = point
         self.current_player = GoBoardUtil.opponent(color)
         return True
@@ -459,6 +460,19 @@ class SimpleGoBoard(object):
         self.last_move = location
         self.board[location] = EMPTY
         self.current_player = GoBoardUtil.opponent(self.current_player)
+
+    def simulate(self):
+        i = 0
+        if not self.endOfGame():
+            allMoves = self.legalMoves()
+            random.shuffle(allMoves)
+            while not self.endOfGame() and i < len(allMoves):
+                self.play_move_gomoku(allMoves[i],self.current_player)
+                i += 1
+        win,winner = self.check_game_end_gomoku()
+        if win:
+            return winner,i
+        return EMPTY, i
 
     def count(self,point,otherpoint,step):
 

@@ -2,7 +2,7 @@
 #/usr/local/bin/python3
 # Set the path to your python3 above
 
-from gtp_connection import GtpConnection
+from gtp_connection import GtpConnection,move_to_coord,coord_to_point
 from board_util import GoBoardUtil,EMPTY, BLACK, WHITE
 from simple_board import SimpleGoBoard
 
@@ -26,12 +26,15 @@ class SimulationPlayer(object):
         bestIndex = score.index(max(score))
         best = moves[bestIndex]
         #print("Best move:", best, "score", score[best])
-        assert best in state.legalMoves()
-        coords = point_to_coord(best, state.size)
-        return format_point(coords)
+        #assert best in state.legalMoves()
+        #coords = point_to_coord(best, state.size)
+        return best
 
-    def simulate(self, state, point, color):
+    def simulate(self, state, move, color):
         stats = [0] * 3
+        #convert the last move to the index point
+        coord = move_to_coord(move,state.size)
+        point = coord_to_point(coord[0],coord[1],state.size)
         state.play_move_gomoku(point,color)
         moveNr = state.moveNumber()
         for _ in range(self.numSimulations):
@@ -42,7 +45,7 @@ class SimulationPlayer(object):
         assert moveNr == state.moveNumber()
         state.undoMove()
         eval = (stats[BLACK] + 0.5 * stats[EMPTY]) / self.numSimulations
-        if state.toPlay == WHITE:
+        if state.current_player == WHITE:
             eval = 1 - eval
         return eval
     

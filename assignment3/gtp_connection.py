@@ -345,6 +345,7 @@ class GtpConnection():
 
     def policy_cmd(self,args):
         self.policy_type = args[0]
+        self.respond("")
 
     def policy_moves(self):
 
@@ -402,17 +403,20 @@ class GtpConnection():
             else:
                 self.respond("resign")
             return
-        move = self.go_engine.genmove(moves,self.board, color)
+        move_type,pending_moves = self.policy_moves()
+        move = self.go_engine.genmove(pending_moves,self.board, color)
         if move == PASS:
             self.respond("pass")
             return
-        move_coord = point_to_coord(move, self.board.size)
-        move_as_string = format_point(move_coord)
-        if self.board.is_legal_gomoku(move, color):
-            self.board.play_move_gomoku(move, color)
-            self.respond(move_as_string)
-        else:
-            self.respond("illegal move: {}".format(move_as_string))
+        #move_coord = point_to_coord(move, self.board.size)
+        #move_as_string = format_point(move_coord)
+        #if self.board.is_legal_gomoku(move, color):
+        coord = move_to_coord(move,self.board.size)
+        point = coord_to_point(coord[0],coord[1],self.board.size)
+        self.board.play_move_gomoku(point, color)
+        self.respond(move)
+        #else:
+        #    self.respond("illegal move: {}".format(move_as_string))
             
 def point_to_coord(point, boardsize):
     """

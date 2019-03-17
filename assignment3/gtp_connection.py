@@ -408,15 +408,11 @@ class GtpConnection():
         if move == PASS:
             self.respond("pass")
             return
-        #move_coord = point_to_coord(move, self.board.size)
-        #move_as_string = format_point(move_coord)
-        #if self.board.is_legal_gomoku(move, color):
         coord = move_to_coord(move,self.board.size)
         point = coord_to_point(coord[0],coord[1],self.board.size)
-        self.board.play_move_gomoku(point, color)
-        self.respond(move)
-        #else:
-        #    self.respond("illegal move: {}".format(move_as_string))
+        if self.board.is_legal_gomoku(point, color):
+            self.board.play_move_gomoku(point, color)
+            self.respond(move)
             
 def point_to_coord(point, boardsize):
     """

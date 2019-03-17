@@ -22,12 +22,8 @@ class SimulationPlayer(object):
         for i in range(numMoves):
             move = moves[i]
             score[i] = self.simulate(state, move, color)
-        #print(score)
         bestIndex = score.index(max(score))
         best = moves[bestIndex]
-        #print("Best move:", best, "score", score[best])
-        #assert best in state.legalMoves()
-        #coords = point_to_coord(best, state.size)
         return best
 
     def simulate(self, state, move, color):

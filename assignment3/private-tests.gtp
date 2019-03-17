@@ -1,0 +1,79 @@
+clear_board
+policy rule_based
+play B A1
+play W C4
+play B B4
+play W A4
+play B F1
+play W A3
+play B E1
+play W C3
+play B D1
+play W E3
+play B B3
+10 policy_moves
+#?[BlockOpenFour C1]
+
+clear_board
+policy rule_based
+play B D1
+play W D3
+play B B1
+play W D2
+play B C1
+play W A3
+20 policy_moves
+#?[OpenFour E1]
+
+
+policy rule_based
+clear_board
+play B E2
+play W C7
+play B D3
+play W D6
+play B C4
+play W E7
+30 policy_moves
+#?[OpenFour B5]
+
+policy rule_based
+clear_board
+play B E2
+play W C7
+play B D3
+play W D6
+play B C4
+30 policy_moves
+#?[BlockOpenFour B5]
+
+40 genmove W
+#?[B5]
+
+play W E5
+50 genmove B
+#?[B5]
+
+clear_board
+play B A1
+play W C4
+play B B4
+play W A4
+play B F1
+play W A3
+play B E1
+play W C3
+play B D1
+play W E3
+play B B3
+play W B2
+play B A7
+play W B7
+play B C7
+play W C1
+play B A5
+play W B6
+60 policy_moves
+#?[Random A2 A6 B1 B5 C2 C5 C6 D2 D3 D4 D5 D6 D7 E2 E4 E5 E6 E7 F2 F3 F4 F5 F6 F7 G1 G2 G3 G4 G5 G6 G7]
+
+

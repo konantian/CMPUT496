@@ -256,31 +256,6 @@ class GtpConnection():
         except Exception as e:
             self.respond('{}'.format(str(e)))
 
-    def genmove_cmd(self, args):
-        """
-        Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
-        """
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        game_end, winner = self.board.check_game_end_gomoku()
-        if game_end:
-            if winner == color:
-                self.respond("pass")
-            else:
-                self.respond("resign")
-            return
-        move = self.go_engine.genmove(moves,self.board, color)
-        if move == PASS:
-            self.respond("pass")
-            return
-        move_coord = point_to_coord(move, self.board.size)
-        move_as_string = format_point(move_coord)
-        if self.board.is_legal_gomoku(move, color):
-            self.board.play_move_gomoku(move, color)
-            self.respond(move_as_string)
-        else:
-            self.respond("illegal move: {}".format(move_as_string))
-
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
     
@@ -358,7 +333,7 @@ class GtpConnection():
                      "pstring/Show Board/gogui-rules_board\n"
                      )
 
-    ##Assignment 3 starts here
+    #####Assignment 3 starts here##############################
     def legalMoves(self):
         moves = GoBoardUtil.generate_legal_moves_gomoku(self.board)
         gtp_moves = []
@@ -396,25 +371,11 @@ class GtpConnection():
                     elif self.board.four_in_row(point,GoBoardUtil.opponent(self.board.current_player),step):
                         block_open_four_moves.append(move)
 
-            if win_moves:
-
-                return "Win ",win_moves
-
-            elif block_win_moves:
-
-                return "BlockWin ",block_win_moves
-
-            elif open_four_moves:
-
-                return "OpenFour ",open_four_moves
-
-            elif block_open_four_moves:
-
-                return "BlockOpenFour ",block_open_four_moves
-
-            else:
-
-                return "Random ",empty_moves
+            move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","Random "]
+            moves=[win_moves,block_win_moves,open_four_moves,block_open_four_moves,empty_moves]
+            for i in range(len(move_types)):
+                if moves[i]:
+                    return move_types[i],moves[i]
 
     def policy_moves_cmd(self,args):
         
@@ -425,6 +386,33 @@ class GtpConnection():
         else:
             self.respond(" ")
         return
+
+    def genmove_cmd(self, args):
+        """
+        Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
+        """
+        board_color = args[0].lower()
+        color = color_to_int(board_color)
+        game_end, winner = self.board.check_game_end_gomoku()
+        if game_end or len(self.legalMoves()) == 0:
+            if winner == color:
+                self.respond("pass")
+            elif len(self.legalMoves()) == 0:
+                self.respond("pass")
+            else:
+                self.respond("resign")
+            return
+        move = self.go_engine.genmove(moves,self.board, color)
+        if move == PASS:
+            self.respond("pass")
+            return
+        move_coord = point_to_coord(move, self.board.size)
+        move_as_string = format_point(move_coord)
+        if self.board.is_legal_gomoku(move, color):
+            self.board.play_move_gomoku(move, color)
+            self.respond(move_as_string)
+        else:
+            self.respond("illegal move: {}".format(move_as_string))
             
 def point_to_coord(point, boardsize):
     """

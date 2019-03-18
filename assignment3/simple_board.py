@@ -528,10 +528,18 @@ class SimpleGoBoard(object):
             emptyB=self.check_empty(point,point-step,-step)
             self.board[point] = EMPTY
             if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
+                self.board[point] = EMPTY
                 return True
-            elif (self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY and (self.get_color(point-step) != EMPTY or self.get_color(point+step) != EMPTY)) or \
-                (self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY and (self.get_color(point-step) != EMPTY or self.get_color(point+step) != EMPTY)):
-                return True
+
+        if self.get_color(point-step) != EMPTY and (self.get_color(point+step) == self.get_color(point+2*step) == self.get_color(point+3*step) == color) and \
+            (self.get_color(point+4*step) == self.get_color(point+5*step) == EMPTY):
+            self.board[point] = EMPTY
+            return True
+        if self.get_color(point+step) != EMPTY and (self.get_color(point-step) == self.get_color(point-2*step) == self.get_color(point-3*step) == color) and \
+            (self.get_color(point-4*step) == self.get_color(point-5*step) == EMPTY):
+            self.board[point] = EMPTY
+            return True
+
         self.board[point] = EMPTY
         return False
 
@@ -550,14 +558,17 @@ class SimpleGoBoard(object):
             return True
 
     def BlockOpenFour(self,point,color,step):
+        
         left = point+step
         right = point-step
         if self.get_color(left) == EMPTY:
-            if self.BlockOpenFourA(left,color,step) and self.get_color(left+5*step) == BORDER:
+            if self.BlockOpenFourA(left,color,step) and self.get_color(left+5*step) != EMPTY:
+                print(1)
                 return True
 
         if self.get_color(right) == EMPTY:
-            if self.BlockOpenFourA(right,color,step) and self.get_color(right-5*step) == BORDER:
+            if self.BlockOpenFourA(right,color,step) and self.get_color(right-5*step) != EMPTY:
+                print(2)
                 return True
 
         if self.BlockOpenFourA(point,color,step):
@@ -570,4 +581,5 @@ class SimpleGoBoard(object):
             return True
 
         return False
+
 

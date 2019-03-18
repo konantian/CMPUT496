@@ -506,6 +506,13 @@ class SimpleGoBoard(object):
             self.board[point] = EMPTY
             if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
                 return True
+        else:
+            if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
+                self.board[point] = EMPTY
+                return True
+            if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
+                self.board[point] = EMPTY
+                return True
         self.board[point] = EMPTY
         return False
 
@@ -524,6 +531,20 @@ class SimpleGoBoard(object):
         self.board[point] = EMPTY
         return False
 
+    def OpenFourB(self,point,color,step):
+
+        if self.get_color(point+step) == color and self.get_color(point+2*step) == color and \
+            self.get_color(point+3*step) == EMPTY and self.get_color(point+4*step) == color and \
+            self.get_color(point+5*step) == EMPTY:
+            return True
+
+    def OpenFourC(self,point,color,step):
+
+        if self.get_color(point-step) == color and self.get_color(point-2*step) == EMPTY and \
+            self.get_color(point-3*step) == color and self.get_color(point-4*step) == color and \
+            self.get_color(point-5*step) == EMPTY:
+            return True
+
     def BlockOpenFour(self,point,color,step):
         left = point+step
         right = point-step
@@ -538,24 +559,10 @@ class SimpleGoBoard(object):
         if self.BlockOpenFourA(point,color,step):
             return True
 
-        if self.get_color(point+step) == color and self.get_color(point+2*step) == color and \
-            self.get_color(point+3*step) == EMPTY and self.get_color(point+4*step) == color and \
-            self.get_color(point+5*step) == EMPTY:
+        if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
             return True
 
-        if self.get_color(point-step) == color and self.get_color(point-2*step) == EMPTY and \
-            self.get_color(point-3*step) == color and self.get_color(point-4*step) == color and \
-            self.get_color(point-5*step) == EMPTY:
-            return True
-
-        if self.get_color(point-step) == color and self.get_color(point-2*step) == color and \
-            self.get_color(point-3*step) == EMPTY and self.get_color(point-4*step) == color and \
-            self.get_color(point-5*step) == EMPTY:
-            return True
-
-        if self.get_color(point+step) == color and self.get_color(point+2*step) == EMPTY and \
-            self.get_color(point+3*step) == color and self.get_color(point+4*step) == color and \
-            self.get_color(point+5*step) == EMPTY:
+        if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
             return True
 
         return False

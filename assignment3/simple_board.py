@@ -529,7 +529,8 @@ class SimpleGoBoard(object):
             self.board[point] = EMPTY
             if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
                 return True
-            elif (self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY) or (self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY):
+            elif (self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY and (self.get_color(point-step) == BORDER or self.get_color(point+step) == BORDER)) or \
+                (self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY and (self.get_color(point-step) == BORDER or self.get_color(point+step) == BORDER)):
                 return True
         self.board[point] = EMPTY
         return False

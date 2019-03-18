@@ -76,4 +76,58 @@ play W B6
 60 policy_moves
 #?[Random A2 A6 B1 B5 C2 C5 C6 D2 D3 D4 D5 D6 D7 E2 E4 E5 E6 E7 F2 F3 F4 F5 F6 F7 G1 G2 G3 G4 G5 G6 G7]
 
+clear_board
+policy rule_based
+play B B3
+play W C4
+play B C3
+play W A4
+play B E3
+70 policy_moves
+#?[BlockOpenFour D3]
 
+play W E5
+80 policy_moves
+#?[OpenFour D3]
+
+clear_board
+policy rule_based
+play B B2
+play W C4
+play B C3
+play W A4
+play B E5
+90 policy_moves
+#?[BlockOpenFour D4]
+
+play W A2
+100 policy_moves
+#?[OpenFour D4]
+
+clear_board
+policy rule_based
+play B D3
+play W A3
+play B C3
+play W A4
+play B E3
+110 policy_moves
+#?[BlockOpenFour B3 F3]
+
+play W A2
+120 policy_moves
+#?[OpenFour F3]
+
+clear_board
+policy rule_based
+play B D4
+play W A1
+play B C3
+play W A4
+play B E5
+130 policy_moves
+#?[BlockOpenFour B2 F6]
+
+play W A6
+140 policy_moves
+#?[OpenFour F6]

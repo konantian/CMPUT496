@@ -1,3 +1,4 @@
+boardsize 7
 clear_board
 policy rule_based
 play B A1
@@ -84,7 +85,7 @@ play B C3
 play W A4
 play B E3
 70 policy_moves
-#?[BlockOpenFour D3]
+#?[BlockOpenFour A3 D3 F3]
 
 play W E5
 80 policy_moves
@@ -98,7 +99,7 @@ play B C3
 play W A4
 play B E5
 90 policy_moves
-#?[BlockOpenFour D4]
+#?[BlockOpenFour A1 D4 F6]
 
 play W A2
 100 policy_moves
@@ -131,3 +132,17 @@ play B E5
 play W A6
 140 policy_moves
 #?[OpenFour F6]
+
+clear_board
+policy rule_based
+play B A2
+play W C4
+play B A3
+play W D4
+play B A5
+150 policy_moves
+#?[BlockOpenFour A1 A4 A6]
+
+play W E4
+160 policy_moves
+#?[OpenFour A4]

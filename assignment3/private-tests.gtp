@@ -46,10 +46,7 @@ play B D3
 play W D6
 play B C4
 30 policy_moves
-#?[BlockOpenFour A6 B5 F1]
-
-40 genmove W
-#?[B5]
+#?[BlockOpenFour B5]
 
 play W E5
 50 genmove B

@@ -498,6 +498,16 @@ class SimpleGoBoard(object):
 
     def OpenFour(self,point,color,step):
 
+        if self.OpenFourA(point,color,step):
+            return True
+        if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
+            return True
+        if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
+            return True
+        return False
+
+    def OpenFourA(self,point,color,step):
+
         self.board[point] = color
         total = self.count(point,point+step,step) + self.count(point,point-step,-step)
         if total == 3:
@@ -505,13 +515,6 @@ class SimpleGoBoard(object):
             emptyB=self.check_empty(point,point-step,-step)
             self.board[point] = EMPTY
             if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
-                return True
-        else:
-            if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
-                self.board[point] = EMPTY
-                return True
-            if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
-                self.board[point] = EMPTY
                 return True
         self.board[point] = EMPTY
         return False

@@ -13,7 +13,7 @@ play B D1
 play W E3
 play B B3
 10 policy_moves
-#?[BlockOpenFour C1]
+#?[BlockOpenFour B1 C1 G1]
 
 clear_board
 policy rule_based
@@ -46,7 +46,7 @@ play B D3
 play W D6
 play B C4
 30 policy_moves
-#?[BlockOpenFour B5]
+#?[BlockOpenFour A6 B5 F1]
 
 40 genmove W
 #?[B5]

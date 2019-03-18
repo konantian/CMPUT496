@@ -537,4 +537,26 @@ class SimpleGoBoard(object):
 
         if self.BlockOpenFourA(point,color,step):
             return True
+
+        if self.get_color(point+step) == color and self.get_color(point+2*step) == color and \
+            self.get_color(point+3*step) == EMPTY and self.get_color(point+4*step) == color and \
+            self.get_color(point+5*step) == EMPTY:
+            return True
+
+        if self.get_color(point-step) == color and self.get_color(point-2*step) == EMPTY and \
+            self.get_color(point-3*step) == color and self.get_color(point-4*step) == color and \
+            self.get_color(point-5*step) == EMPTY:
+            return True
+
+        if self.get_color(point-step) == color and self.get_color(point-2*step) == color and \
+            self.get_color(point-3*step) == EMPTY and self.get_color(point-4*step) == color and \
+            self.get_color(point-5*step) == EMPTY:
+            return True
+
+        if self.get_color(point+step) == color and self.get_color(point+2*step) == EMPTY and \
+            self.get_color(point+3*step) == color and self.get_color(point+4*step) == color and \
+            self.get_color(point+5*step) == EMPTY:
+            return True
+
         return False
+

@@ -200,7 +200,7 @@ play W A3
 play B D4
 
 120 policy_moves
-#?[BlockOpenFour D5]
+#?[BlockOpenFour D1 D5]
 
 boardsize 6
 130 policy_moves

@@ -496,7 +496,20 @@ class SimpleGoBoard(object):
         else:
             return self.check_empty(point,otherpoint+step,step)
 
-    def four_in_row(self,point,color,step):
+    def OpenFour(self,point,color,step):
+
+        self.board[point] = color
+        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
+        if total == 3:
+            emptyA=self.check_empty(point,point+step,step)
+            emptyB=self.check_empty(point,point-step,-step)
+            self.board[point] = EMPTY
+            if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
+                return True
+        self.board[point] = EMPTY
+        return False
+
+    def BlockOpenFourA(self,point,color,step):
 
         self.board[point] = color
         total = self.count(point,point+step,step) + self.count(point,point-step,-step)
@@ -507,7 +520,21 @@ class SimpleGoBoard(object):
             if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
                 return True
             elif (self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY) or (self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY):
-                return False
+                return True
         self.board[point] = EMPTY
         return False
 
+    def BlockOpenFour(self,point,color,step):
+        left = point+step
+        right = point-step
+        if self.get_color(left) == EMPTY:
+            if self.BlockOpenFourA(left,color,step) and self.get_color(left+5*step) == BORDER:
+                return True
+
+        if self.get_color(right) == EMPTY:
+            if self.BlockOpenFourA(right,color,step) and self.get_color(right-5*step) == BORDER:
+                return True
+
+        if self.BlockOpenFourA(point,color,step):
+            return True
+        return False

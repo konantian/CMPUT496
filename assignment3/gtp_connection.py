@@ -367,9 +367,9 @@ class GtpConnection():
                         win_moves.append(move)
                     elif self.board.five_in_row(point,GoBoardUtil.opponent(self.board.current_player),step):
                         block_win_moves.append(move)
-                    elif self.board.four_in_row(point,self.board.current_player,step):
+                    elif self.board.OpenFour(point,self.board.current_player,step):
                         open_four_moves.append(move)
-                    elif self.board.four_in_row(point,GoBoardUtil.opponent(self.board.current_player),step):
+                    elif self.board.BlockOpenFour(point,GoBoardUtil.opponent(self.board.current_player),step):
                         block_open_four_moves.append(move)
 
             move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","Random "]

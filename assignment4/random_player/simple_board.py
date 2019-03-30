@@ -1,4 +1,3 @@
-
 """
 simple_board.py
 
@@ -9,21 +8,16 @@ Implements a basic Go board with functions to:
 
 The board uses a 1-dimensional representation with padding
 """
-import random
+
 import numpy as np
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, \
                        PASS, is_black_white, coord_to_point, where1d, \
                        MAXSIZE, NULLPOINT
 
-from gtp_connection import point_to_coord,format_point
-
 class SimpleGoBoard(object):
 
     def get_color(self, point):
-        try:
-            return self.board[point]
-        except:
-            return 3
+        return self.board[point]
 
     def pt(self, row, col):
         return coord_to_point(row, col, self.size)
@@ -75,8 +69,6 @@ class SimpleGoBoard(object):
         """
         assert 2 <= size <= MAXSIZE
         self.reset(size)
-        self.moves=[]
-        self.last_move = None
 
     def reset(self, size):
         """
@@ -94,8 +86,6 @@ class SimpleGoBoard(object):
         self.liberty_of = np.full(self.maxpoint, NULLPOINT, dtype = np.int32)
         self._initialize_empty_points(self.board)
         self._initialize_neighbors()
-        self.moves=[]
-        self.last_move = None
 
     def copy(self):
         b = SimpleGoBoard(self.size)
@@ -357,8 +347,6 @@ class SimpleGoBoard(object):
         if self.board[point] != EMPTY:
             return False
         self.board[point] = color
-        self.moves.append(point)
-        self.last_move = point
         self.current_player = GoBoardUtil.opponent(color)
         return True
         
@@ -430,154 +418,3 @@ class SimpleGoBoard(object):
                 return True, BLACK
 
         return False, None
-
-
-    ##Assignment 3 starts here
-    def endOfGame(self):
-
-        end,player = self.check_game_end_gomoku()
-        return end
-
-    def legalMoves(self):
-
-        return GoBoardUtil.generate_legal_moves_gomoku(self)
-
-    def moveNumber(self):
-
-        return len(self.moves)
-
-
-    def resetToMoveNumber(self,moveNr):
-
-        numUndos = self.moveNumber() - moveNr
-        assert numUndos >= 0
-        for _ in range(numUndos):
-            self.undoMove()
-        assert self.moveNumber() == moveNr
-
-    def undoMove(self):
-        location = self.moves.pop()
-        self.last_move = location
-        self.board[location] = EMPTY
-        self.current_player = GoBoardUtil.opponent(self.current_player)
-
-    def simulate(self):
-        i = 0
-        if not self.endOfGame():
-            allMoves = self.legalMoves()
-            random.shuffle(allMoves)
-            while not self.endOfGame() and i < len(allMoves):
-                self.play_move_gomoku(allMoves[i],self.current_player)
-                i += 1
-        win,winner = self.check_game_end_gomoku()
-        if win:
-            return winner,i
-        return EMPTY, i
-
-    def count(self,point,otherpoint,step):
-
-        if self.get_color(point) != self.get_color(otherpoint):
-            return 0
-        else:
-            return 1 + self.count(point,otherpoint+step,step)
-
-    def five_in_row(self,point,color,step):
-
-        self.board[point] = color
-        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
-        self.board[point] = EMPTY
-        
-        return True if total >= 4 else False
-
-
-    def check_empty(self,point,otherpoint,step):
-        if self.get_color(point) != self.get_color(otherpoint):
-            return otherpoint
-        else:
-            return self.check_empty(point,otherpoint+step,step)
-
-    def OpenFour(self,point,color,step):
-
-        if self.OpenFourA(point,color,step):
-            return True
-        if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
-            return True
-        if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
-            return True
-        return False
-
-    def OpenFourA(self,point,color,step):
-
-        self.board[point] = color
-        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
-        if total == 3:
-            emptyA=self.check_empty(point,point+step,step)
-            emptyB=self.check_empty(point,point-step,-step)
-            self.board[point] = EMPTY
-            if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
-                return True
-        self.board[point] = EMPTY
-        return False
-
-    def BlockOpenFourA(self,point,color,step):
-
-        self.board[point] = color
-        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
-        if total == 3:
-            emptyA=self.check_empty(point,point+step,step)
-            emptyB=self.check_empty(point,point-step,-step)
-            self.board[point] = EMPTY
-            if self.get_color(emptyA) == self.get_color(emptyB) == EMPTY:
-                self.board[point] = EMPTY
-                return True
-
-        if self.get_color(point-step) != EMPTY and (self.get_color(point+step) == self.get_color(point+2*step) == self.get_color(point+3*step) == color) and \
-            (self.get_color(point+4*step) == self.get_color(point+5*step) == EMPTY):
-            self.board[point] = EMPTY
-            return True
-        if self.get_color(point+step) != EMPTY and (self.get_color(point-step) == self.get_color(point-2*step) == self.get_color(point-3*step) == color) and \
-            (self.get_color(point-4*step) == self.get_color(point-5*step) == EMPTY):
-            self.board[point] = EMPTY
-            return True
-
-        self.board[point] = EMPTY
-        return False
-
-    def OpenFourB(self,point,color,step):
-
-        if self.get_color(point+step) == color and self.get_color(point+2*step) == color and \
-            self.get_color(point+3*step) == EMPTY and self.get_color(point+4*step) == color and \
-            self.get_color(point+5*step) == EMPTY:
-            return True
-
-    def OpenFourC(self,point,color,step):
-
-        if self.get_color(point-step) == color and self.get_color(point-2*step) == EMPTY and \
-            self.get_color(point-3*step) == color and self.get_color(point-4*step) == color and \
-            self.get_color(point-5*step) == EMPTY:
-            return True
-
-    def BlockOpenFour(self,point,color,step):
-        
-        left = point+step
-        right = point-step
-        if self.get_color(left) == EMPTY:
-            if self.BlockOpenFourA(left,color,step) and self.get_color(left+5*step) != EMPTY:
-                return True
-
-        if self.get_color(right) == EMPTY:
-            if self.BlockOpenFourA(right,color,step) and self.get_color(right-5*step) != EMPTY:
-                return True
-
-        if self.BlockOpenFourA(point,color,step):
-            return True
-
-        if self.OpenFourB(point,color,step) or self.OpenFourB(point,color,-step):
-            return True
-
-        if self.OpenFourC(point,color,step) or self.OpenFourC(point,color,-step):
-            return True
-
-        return False
-
-

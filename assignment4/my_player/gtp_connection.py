@@ -419,6 +419,8 @@ class GtpConnection():
         open_four_moves=[]
         block_open_four_moves=[]
         open_three_moves = []
+        double_open_three = []
+        block_open_three = []
         steps = [1,self.board.NS,self.board.NS-1,self.board.NS+1]
         for move in empty_moves:
             for step in steps:
@@ -433,10 +435,17 @@ class GtpConnection():
                     block_open_four_moves.append(move)
                 elif self.board.OpenThree(point,self.board.current_player,step):
                     open_three_moves.append(move)
+                elif self.board.OpenThree(point,GoBoardUtil.opponent(self.board.current_player),step):
+                    block_open_three.append(move)
 
+        for move in set(open_three_moves):
+            if open_three_moves.count(move) > 1:
+                double_open_three.append(move)
 
-        move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","OpenThree ","Random "]
-        moves=[win_moves,block_win_moves,open_four_moves,block_open_four_moves,open_three_moves,empty_moves]
+        block_open_three = [move for move in set(block_open_three) if block_open_three.count(move) > 1]
+
+        move_types=["Win ","BlockWin ","OpenFour ","DoubleOpenThree","BlockDoubleThree","BlockOpenFour ","OpenThree ","Random "]
+        moves=[win_moves,block_win_moves,open_four_moves,double_open_three,block_open_three,block_open_four_moves,open_three_moves,empty_moves]
         for i in range(len(move_types)):
             if moves[i]:
                 return move_types[i],moves[i]

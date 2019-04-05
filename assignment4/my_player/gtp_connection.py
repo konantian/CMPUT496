@@ -466,9 +466,10 @@ class GtpConnection():
             else:
                 self.respond("resign")
             return
-        move_type,pending_moves = self.policy_moves()
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(self.timelimit)
         try:
-            signal.alarm(int(self.timelimit))
+            move_type,pending_moves = self.policy_moves()
             move = self.go_engine.genmove(pending_moves,self.board, color)
             signal.alarm(0)
         except Exception as e:
@@ -482,6 +483,9 @@ class GtpConnection():
         if self.board.is_legal_gomoku(point, color):
             self.board.play_move_gomoku(point, color)
             self.respond(move)
+
+def signal_handler(signum, frame):
+    raise Exception("Timed out!")
             
 def point_to_coord(point, boardsize):
     """

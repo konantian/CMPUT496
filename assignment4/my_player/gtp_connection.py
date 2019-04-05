@@ -402,7 +402,12 @@ class GtpConnection():
 
         #Opening
         
-        #if self.open == False:
+        if self.count_color(BLACK) == 0:
+            return "First Move, ",["D4"]
+
+        if self.count_color(BLACK) == 1 and self.board.get_color(36) == EMPTY and self.board.current_player == WHITE:
+            return "First Move, ",["D4"]
+
 
         if self.count_color(self.board.current_player) == 1 and self.count_color(GoBoardUtil.opponent(self.board.current_player)) >= 1:
             my_position = self.find_stone(self.board.current_player)

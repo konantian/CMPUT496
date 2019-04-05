@@ -31,7 +31,7 @@ class GtpConnection():
         self.go_engine = go_engine
         self.board = board
         self.policy_type = "rule_based"
-        signal.signal(signal.SIGALRM, self.handler)
+        #signal.signal(signal.SIGALRM, self.handler)
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,

@@ -632,7 +632,7 @@ class SimpleGoBoard(object):
             points.append(pointA+2*directions[i]['down']+directions[i]['right'])
             points.append(pointA+2*directions[i]['down']+2*directions[i]['right'])
 
-        points = set([point for point in points if self.board[point] == EMPTY])
+        points = set([point for point in points if self.get_color(point) == EMPTY])
         return points
 
 

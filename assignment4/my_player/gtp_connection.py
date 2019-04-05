@@ -30,6 +30,7 @@ class GtpConnection():
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.policy_type = "rule_based"
         signal.signal(signal.SIGALRM, self.handler)
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
@@ -52,14 +53,12 @@ class GtpConnection():
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
             "gogui-analyze_commands": self.gogui_analyze_cmd,
-            "timelimit": self.timelimit_cmd,
-            "solve": self.solve_cmd,
-            "list_solve_point": self.list_solve_point_cmd, # below is added for Gomoku3
-            "policy": self.set_playout_policy, 
-            "policy_moves": self.display_pattern_moves
+            "policy_moves": self.policy_moves_cmd,
+            "policy": self.policy_cmd,
+            "count":self.count_color_cmd
         }
-        self.timelimit=60
-
+        self.timelimit = 60
+        self.open = False
         # used for argument checking
         # values: (required number of arguments, 
         #          error message on argnum failure)
@@ -69,40 +68,13 @@ class GtpConnection():
             "known_command": (1, 'Usage: known_command CMD_NAME'),
             "genmove": (1, 'Usage: genmove {w,b}'),
             "play": (2, 'Usage: play {b,w} MOVE'),
-            "legal_moves": (1, 'Usage: legal_moves {w,b}'),
-            "policy":(1, 'Usage: set playout policy {random, rule_based}')
+            "legal_moves": (1, 'Usage: legal_moves {w,b}')
         }
-        points = GoBoardUtil.generate_legal_moves_gomoku(self.board)
+        self.all_points = GoBoardUtil.generate_legal_moves_gomoku(self.board)
         moves = self.legalMoves()
-        self.move_to_point=dict(zip(moves,points))
-        self.point_to_move=dict(zip(points,moves))
+        self.move_to_point=dict(zip(moves,self.all_points))
+        self.point_to_move=dict(zip(self.all_points,moves))
     
-    def set_playout_policy(self, args):
-        playout_policy=args[0]
-        self.go_engine.set_playout_policy(playout_policy)
-        self.respond()
-
-    def display_pattern_moves(self, args):
-        game_end, winner = self.board.check_game_end_gomoku()
-        color=self.board.current_player
-        if game_end:
-            if winner == color:
-                self.respond("")
-            else:
-                self.respond("")
-            return
-        all_moves=self.board.get_empty_points()
-        if len(all_moves) == 0:
-            self.respond('')
-            return
-        moveType, moves=self.go_engine.policy_moves(self.board, color)
-        gtp_moves = []
-        for move in moves:
-            coords = point_to_coord(move, self.board.size)
-            gtp_moves.append(format_point(coords))
-        sorted_moves = ' '.join(sorted(gtp_moves))
-        self.respond(moveType+' '+sorted_moves)
-
     def write(self, data):
         stdout.write(data) 
 
@@ -185,6 +157,7 @@ class GtpConnection():
         moves = self.legalMoves()
         self.move_to_point=dict(zip(moves,points))
         self.point_to_move=dict(zip(points,moves))
+        self.open = False
 
     def board2d(self):
         return str(GoBoardUtil.get_twoD_board(self.board))
@@ -288,78 +261,16 @@ class GtpConnection():
         except Exception as e:
             self.respond('{}'.format(str(e)))
 
-    def timelimit_cmd(self, args):
-        self.timelimit = args[0]
-        self.respond('')
-
-    def handler(self, signum, fram):
-        self.board = self.sboard
-        raise Exception("unknown")
-
-    def solve_cmd(self, args):
-        try:
-            self.sboard = self.board.copy()
-            signal.alarm(int(self.timelimit)-1)
-            winner,move = self.board.solve()
-            self.board = self.sboard
-            signal.alarm(0)
-            if move != "NoMove":
-                if move == None:
-                    self.respond('{} {}'.format(winner, self.board._point_to_coord(move)))
-                    return 
-                self.respond('{} {}'.format(winner, format_point(point_to_coord(move, self.board.size))))
-                return 
-            self.respond('{}'.format(winner))
-        except Exception as e:
-            self.respond('{}'.format(str(e)))
-
-    def genmove_cmd(self, args):
-        """
-        Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
-        """
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        game_end, winner = self.board.check_game_end_gomoku()
-        if game_end:
-            if winner == color:
-                self.respond("pass")
-            else:
-                self.respond("resign")
-            return
-        moves = self.board.get_empty_points()
-        board_is_full = (len(moves) == 0)
-        if board_is_full:
-            self.respond("pass")
-            return
-        move=None
-        try:
-            signal.alarm(int(self.timelimit))
-            self.sboard = self.board.copy()
-            move = self.go_engine.get_move(self.board, color)
-            self.board=self.sboard
-            signal.alarm(0)
-        except Exception as e:
-            move=self.go_engine.best_move
-
-        if move == PASS:
-            self.respond("pass")
-            return
-        move_coord = point_to_coord(move, self.board.size)
-        move_as_string = format_point(move_coord)
-        if self.board.is_legal_gomoku(move, color):
-            self.board.play_move_gomoku(move, color)
-            self.respond(move_as_string)
-        else:
-            self.respond("illegal move: {}".format(move_as_string))
-
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
     
     def gogui_rules_board_size_cmd(self, args):
         self.respond(str(self.board.size))
-    """
+    
     def legal_moves_cmd(self, args):
-        #List legal moves for color args[0] in {'b','w'}
+        """
+            List legal moves for color args[0] in {'b','w'}
+            """
         board_color = args[0].lower()
         color = color_to_int(board_color)
         moves = GoBoardUtil.generate_legal_moves(self.board, color)
@@ -369,7 +280,6 @@ class GtpConnection():
             gtp_moves.append(format_point(coords))
         sorted_moves = ' '.join(sorted(gtp_moves))
         self.respond(sorted_moves)
-    """
 
     def gogui_rules_legal_moves_cmd(self, args):
         game_end,_ = self.board.check_game_end_gomoku()
@@ -428,9 +338,7 @@ class GtpConnection():
                      "pstring/Show Board/gogui-rules_board\n"
                      )
 
-    def list_solve_point_cmd(self, args):
-        self.respond(self.board.list_solve_point())
-
+    #####Assignment 3 starts here##############################
     def legalMoves(self):
         moves = GoBoardUtil.generate_legal_moves_gomoku(self.board)
         gtp_moves = []
@@ -440,13 +348,76 @@ class GtpConnection():
 
         return gtp_moves
 
+    def policy_cmd(self,args):
+        self.policy_type = args[0]
+        self.respond("")
+
+    def timelimit_cmd(self, args):
+        self.timelimit = args[0]
+        self.respond('')
+
+    def count_color(self,color):
+        count = 0
+        empty_points = self.all_points
+        for point in empty_points:
+            if self.board.get_color(point) == color:
+                count += 1
+
+        return count
+
+    def find_stone(self,color):
+        
+        empty_points = self.all_points
+        for point in empty_points:
+            if self.board.get_color(point) == color:
+                return point
+
+    def check_direction(self,pointA,pointB):
+
+        vert_steps = [1,self.board.NS,-1,-self.board.NS]
+        for step in vert_steps:
+            if pointA + step == pointB:
+                return 'vert_hori',step
+
+        diag_steps = [self.board.NS-1,self.board.NS+1,1-self.board.NS,-self.board.NS-1]
+        for step in diag_steps:
+            if pointA + step == pointB:
+                return 'diagonal',step
+
+        return 'None',None
+
+    def count_color_cmd(self,color):
+        color = BLACK if color == 'b' else WHITE
+        count = 0
+        empty_moves = self.legalMoves()
+        empty_points=[self.move_to_point[move] for move in empty_moves]
+        self.respond(str(empty_points))
+        for point in empty_points:
+            if self.board.get_color(point) == color:
+                count += 1
+
+        self.respond(str(count))
+
     def policy_moves(self):
 
+        #Opening
+        
+        #if self.open == False:
+
+        if self.count_color(self.board.current_player) == 1 and self.count_color(GoBoardUtil.opponent(self.board.current_player)) >= 1:
+            my_position = self.find_stone(self.board.current_player)
+            #print(black_position,white_position)
+            #direction,step = self.check_direction(black_position,white_position)
+            #if direction == "vert_hori":
+            pointsA = self.board.StraightOpening(my_position)
+            #print(pointsA)
+            return "Opening",[self.point_to_move[point] for point in pointsA]
+        
         empty_moves = self.legalMoves()
-        win_moves = []
-        block_win_moves = []
-        open_four_moves = []
-        block_open_four_moves = []
+        win_moves=[]
+        block_win_moves=[]
+        open_four_moves=[]
+        block_open_four_moves=[]
         open_three_moves = []
         steps = [1,self.board.NS,self.board.NS-1,self.board.NS+1]
         for move in empty_moves:
@@ -460,14 +431,58 @@ class GtpConnection():
                     open_four_moves.append(move)
                 elif self.board.BlockOpenFour(point,GoBoardUtil.opponent(self.board.current_player),step):
                     block_open_four_moves.append(move)
+                elif self.board.OpenThree(point,self.board.current_player,step):
+                    open_three_moves.append(move)
 
-        move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","OpenThree","Random "]
+
+        move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","OpenThree ","Random "]
         moves=[win_moves,block_win_moves,open_four_moves,block_open_four_moves,open_three_moves,empty_moves]
         for i in range(len(move_types)):
             if moves[i]:
-                return moves[i]
+                return move_types[i],moves[i]
 
+    def policy_moves_cmd(self,args):
+        
+        move_type,moves = self.policy_moves()
+        if moves:
+            move_as_string = ' '.join(sorted(moves))
+            self.respond(move_type+move_as_string)
+        else:
+            self.respond(" ")
+        return
 
+    def genmove_cmd(self, args):
+        """
+        Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
+        """
+        board_color = args[0].lower()
+        color = color_to_int(board_color)
+        game_end, winner = self.board.check_game_end_gomoku()
+        if game_end or len(self.legalMoves()) == 0:
+            if winner == color:
+                self.respond("pass")
+            elif len(self.legalMoves()) == 0:
+                self.respond("pass")
+            else:
+                self.respond("resign")
+            return
+        move_type,pending_moves = self.policy_moves()
+        try:
+            signal.alarm(int(self.timelimit))
+            move = self.go_engine.genmove(pending_moves,self.board, color)
+            signal.alarm(0)
+        except Exception as e:
+            move = np.random.choice(self.legalMoves())
+
+        if move == PASS:
+            self.respond("pass")
+            return
+        coord = move_to_coord(move,self.board.size)
+        point = coord_to_point(coord[0],coord[1],self.board.size)
+        if self.board.is_legal_gomoku(point, color):
+            self.board.play_move_gomoku(point, color)
+            self.respond(move)
+            
 def point_to_coord(point, boardsize):
     """
     Transform point given as board array index 

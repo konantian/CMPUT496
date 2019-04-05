@@ -2,7 +2,7 @@
 #/usr/local/bin/python3
 # Set the path to your python3 above
 
-from gtp_connection import GtpConnection
+from gtp_connection import GtpConnection,move_to_coord,coord_to_point,point_to_coord,format_point
 from board_util import GoBoardUtil, EMPTY
 from simple_board import SimpleGoBoard
 
@@ -10,11 +10,25 @@ import random
 import numpy as np
 
 def undo(board,move):
-    board.board[move]=EMPTY
-    board.current_player=GoBoardUtil.opponent(board.current_player)
+
+    if isinstance(move,str):
+        coord = move_to_coord(move,board.size)
+        point = coord_to_point(coord[0],coord[1],board.size)
+        board.board[point]=EMPTY
+        board.current_player=GoBoardUtil.opponent(board.current_player)
+    else:
+        board.board[move]=EMPTY
+        board.current_player=GoBoardUtil.opponent(board.current_player)
 
 def play_move(board, move, color):
-    board.play_move_gomoku(move, color)
+    #print(type(move))
+    if isinstance(move,str):
+        coord = move_to_coord(move,board.size)
+        point = coord_to_point(coord[0],coord[1],board.size)
+        board.play_move_gomoku(point, color)
+    else:
+        board.play_move_gomoku(move, color)
+
 
 def game_result(board):
     game_end, winner = board.check_game_end_gomoku()
@@ -45,6 +59,7 @@ class GomokuSimulationPlayer(object):
         self.name="Gomoku3"
         self.version = 3.0
         self.best_move=None
+
     
     def set_playout_policy(self, playout_policy='random'):
         assert(playout_policy in ['random', 'rule_based'])
@@ -64,12 +79,55 @@ class GomokuSimulationPlayer(object):
                 return "Random", self._random_moves(board, color_to_play)
             movetype_id, moves=ret
             return self.pattern_list[movetype_id], moves
+
+
+    def legalMoves(self,board):
+        moves = GoBoardUtil.generate_legal_moves_gomoku(board)
+        gtp_moves = []
+        for move in moves:
+            coords = point_to_coord(move, board.size)
+            gtp_moves.append(format_point(coords))
+
+        return gtp_moves
+
+    def my_policy_moves(self,board,color):
+
+        points = GoBoardUtil.generate_legal_moves_gomoku(board)
+        moves = self.legalMoves(board)
+        self.move_to_point=dict(zip(moves,points))
+        self.point_to_move=dict(zip(points,moves))
+
+        empty_moves = self.legalMoves(board)
+        win_moves = []
+        block_win_moves = []
+        open_four_moves = []
+        block_open_four_moves = []
+        open_three_moves = []
+        steps = [1,board.NS,board.NS-1,board.NS+1]
+        for move in empty_moves:
+            for step in steps:
+                point = self.move_to_point[move]
+                if board.five_in_row(point,board.current_player,step):
+                    win_moves.append(move)
+                elif board.five_in_row(point,GoBoardUtil.opponent(board.current_player),step):
+                    block_win_moves.append(move)
+                elif board.OpenFour(point,board.current_player,step):
+                    open_four_moves.append(move)
+                elif board.BlockOpenFour(point,GoBoardUtil.opponent(board.current_player),step):
+                    block_open_four_moves.append(move)
+
+        move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","Random "]
+        moves=[win_moves,block_win_moves,open_four_moves,block_open_four_moves,empty_moves]
+        for i in range(len(move_types)):
+            if moves[i]:
+                return move_types,moves[i]
     
     def _do_playout(self, board, color_to_play):
         res=game_result(board)
         simulation_moves=[]
         while(res is None):
-            _ , candidate_moves = self.policy_moves(board, board.current_player)
+            _ , candidate_moves = self.my_policy_moves(board, board.current_player)
+            #print(candidate_moves)
             playout_move=random.choice(candidate_moves)
             play_move(board, playout_move, board.current_player)
             simulation_moves.append(playout_move)
@@ -89,6 +147,7 @@ class GomokuSimulationPlayer(object):
         The genmove function called by gtp_connection
         """
         moves=GoBoardUtil.generate_legal_moves_gomoku(board)
+        #moves = pending_moves
         toplay=board.current_player
         best_result, best_move=-1.1, None
         best_move=moves[0]

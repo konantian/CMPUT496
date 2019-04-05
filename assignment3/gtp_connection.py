@@ -54,7 +54,7 @@ class GtpConnection():
             "policy_moves": self.policy_moves_cmd,
             "policy": self.policy_cmd
         }
-
+        self.timelimit = 60
         # used for argument checking
         # values: (required number of arguments, 
         #          error message on argnum failure)
@@ -404,7 +404,12 @@ class GtpConnection():
                 self.respond("resign")
             return
         move_type,pending_moves = self.policy_moves()
-        move = self.go_engine.genmove(pending_moves,self.board, color)
+        try:
+            signal.alarm(int(self.timelimit))
+            move = self.go_engine.genmove(pending_moves,self.board, color)
+            signal.alarm(0)
+        except Exception as e:
+            move = PASS
         if move == PASS:
             self.respond("pass")
             return

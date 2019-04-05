@@ -411,7 +411,7 @@ class GtpConnection():
             #if direction == "vert_hori":
             pointsA = self.board.StraightOpening(my_position)
             #print(pointsA)
-            return "Opening",[self.point_to_move[point] for point in pointsA]
+            return "Opening ",[self.point_to_move[point] for point in pointsA]
         
         empty_moves = self.legalMoves()
         win_moves=[]
@@ -421,6 +421,9 @@ class GtpConnection():
         open_three_moves = []
         double_open_three = []
         block_open_three = []
+        double_dead_four = []
+        block_dead_four = []
+        
         steps = [1,self.board.NS,self.board.NS-1,self.board.NS+1]
         for move in empty_moves:
             for step in steps:
@@ -437,15 +440,21 @@ class GtpConnection():
                     open_three_moves.append(move)
                 elif self.board.OpenThree(point,GoBoardUtil.opponent(self.board.current_player),step):
                     block_open_three.append(move)
+                elif self.board.DeadFour(point,self.board.current_player,step):
+                    double_dead_four.append(move)
+                elif self.board.DeadFour(point,GoBoardUtil.opponent(self.board.current_player),step):
+                    block_dead_four.append(move)
 
-        for move in set(open_three_moves):
-            if open_three_moves.count(move) > 1:
-                double_open_three.append(move)
 
+        dead_four_open_three = set(double_dead_four).intersection(set(open_three_moves))
+        double_open_three = [move for move in set(open_three_moves) if open_three_moves.count(move) > 1]
         block_open_three = [move for move in set(block_open_three) if block_open_three.count(move) > 1]
+        double_dead_four = [move for move in set(double_dead_four) if double_dead_four.count(move) > 1]
+        block_dead_four = [move for move in set(block_dead_four) if block_dead_four.count(move) > 1]
 
-        move_types=["Win ","BlockWin ","OpenFour ","DoubleOpenThree","BlockDoubleThree","BlockOpenFour ","OpenThree ","Random "]
-        moves=[win_moves,block_win_moves,open_four_moves,double_open_three,block_open_three,block_open_four_moves,open_three_moves,empty_moves]
+        #print(double_dead_four)
+        move_types=["Win ","BlockWin ","OpenFour ","DoubleDeadFour","DeadFourOpenThree ","DoubleOpenThree","BlockOpenFour ","BlockDoubleDeadFour ","BlockDoubleThree","OpenThree ","Random "]
+        moves=[win_moves,block_win_moves,open_four_moves,double_dead_four,dead_four_open_three,double_open_three,block_open_four_moves,block_dead_four,block_open_three,open_three_moves,empty_moves]
         for i in range(len(move_types)):
             if moves[i]:
                 return move_types[i],moves[i]

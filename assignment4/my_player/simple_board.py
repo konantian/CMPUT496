@@ -600,10 +600,25 @@ class SimpleGoBoard(object):
 
         return False
 
+    def DeadFour(self,point,color,step):
+        self.board[point] = color
+        total = self.count(point,point+step,step) + self.count(point,point-step,-step)
+        if total == 3:
+            emptyA=self.check_empty(point,point+step,step)
+            emptyB=self.check_empty(point,point-step,-step)
+            if self.get_color(emptyA) == EMPTY and self.get_color(emptyB) != EMPTY:
+                self.board[point] = EMPTY
+                return True
+
+            if self.get_color(emptyB) == EMPTY and self.get_color(emptyA) != EMPTY:
+                self.board[point] = EMPTY
+                return True
+        self.board[point] = EMPTY
+        return False
 
     def StraightOpening(self,pointA):
 
-        points = []
+        points = set()
 
         #Top
         top={"left":1,"right":-1,"top":self.NS,"down":-self.NS}
@@ -618,21 +633,21 @@ class SimpleGoBoard(object):
         #print(direction)
         steps = [1,-1,self.NS,-self.NS]
         for i in range(len(steps)):
-            points.append(pointA+2*directions[i]['top'])
-            points.append(pointA+2*directions[i]['top']+directions[i]['right'])
-            points.append(pointA+2*directions[i]['top']+2*directions[i]['right'])
-            points.append(pointA+directions[i]['top']+directions[i]['right'])
-            points.append(pointA+directions[i]['top']+2*directions[i]['right'])
-            points.append(pointA+directions[i]['right'])
-            points.append(pointA+2*directions[i]['right'])
-            points.append(pointA+directions[i]['down'])
-            points.append(pointA+directions[i]['down']+directions[i]['right'])
-            points.append(pointA+directions[i]['down']+2*directions[i]['right'])
-            points.append(pointA+2*directions[i]['down'])
-            points.append(pointA+2*directions[i]['down']+directions[i]['right'])
-            points.append(pointA+2*directions[i]['down']+2*directions[i]['right'])
+            points.add(pointA+2*directions[i]['top'])
+            points.add(pointA+2*directions[i]['top']+directions[i]['right'])
+            points.add(pointA+2*directions[i]['top']+2*directions[i]['right'])
+            points.add(pointA+directions[i]['top']+directions[i]['right'])
+            points.add(pointA+directions[i]['top']+2*directions[i]['right'])
+            points.add(pointA+directions[i]['right'])
+            points.add(pointA+2*directions[i]['right'])
+            points.add(pointA+directions[i]['down'])
+            points.add(pointA+directions[i]['down']+directions[i]['right'])
+            points.add(pointA+directions[i]['down']+2*directions[i]['right'])
+            points.add(pointA+2*directions[i]['down'])
+            points.add(pointA+2*directions[i]['down']+directions[i]['right'])
+            points.add(pointA+2*directions[i]['down']+2*directions[i]['right'])
 
-        points = set([point for point in points if self.get_color(point) == EMPTY])
+        points = [point for point in points if self.get_color(point) == EMPTY]
         return points
 
 

@@ -50,7 +50,7 @@ def run():
     start the gtp connection and wait for commands.
     """
     board = SimpleGoBoard(7)
-    con = GtpConnection(SimulationPlayer(50), board)
+    con = GtpConnection(SimulationPlayer(30), board)
     con.start_connection()
 
 if __name__=='__main__':

@@ -26,6 +26,7 @@ def setupPlayer(p):
     p.sendline('timelimit {}'.format(timeout))
 
 def playSingleGame(alternative=False):
+    global moves_dic
     if not alternative:
         p1=pexpect.spawn('python3 '+player1,timeout=timeout+1)
         p2=pexpect.spawn('python3 '+player2,timeout=timeout+1)
@@ -107,7 +108,9 @@ def playGames(numGame=10):
                     win2+=1
 
 def outputResult():
+    global moves_dic
     print('player1 win',win1,'player2 win',win2,'draw',draw)
+    print(moves_dic)
 
 playGames()
 outputResult()

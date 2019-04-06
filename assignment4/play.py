@@ -8,6 +8,7 @@ win2=0
 numTimeout=0
 draw=0
 timeout = 60
+moves_dic={}
 
 def getMove(p,color):
     p.sendline('genmove '+color)
@@ -61,6 +62,10 @@ def playSingleGame(alternative=False):
             playMove(p1,'w',move)
             playMove(ob,'w',move)
         sw=1-sw
+        if move in moves_dic:
+            moves_dic[move] += 1
+        else:
+            moves_dic[move] = 1
         print(move)
         ob.sendline('gogui-rules_final_result')
         ob.expect(['= black','= white','= draw','= unknown'])

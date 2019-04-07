@@ -496,7 +496,7 @@ class GtpConnection():
             move = self.go_engine.genmove(pending_moves,self.board, color)
             signal.alarm(0)
         except Exception as e:
-            move = np.random.choice(self.legalMoves())
+            return self.go_engine.bestMove
 
         if move == PASS:
             self.respond("pass")

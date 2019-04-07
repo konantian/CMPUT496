@@ -1,13 +1,13 @@
 import pexpect
 
 player1='my_player/Gomoku4.py'
-player2='mcts/Gomoku4.py'
+player2='flat_mc_player/Gomoku3.py'
 
 win1=0
 win2=0
 numTimeout=0
 draw=0
-timeout = 60
+timeout = 5
 moves_dic={}
 
 def getMove(p,color):

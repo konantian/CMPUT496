@@ -19,6 +19,7 @@ class SimulationPlayer(object):
         self.count = None
         self.c = 2
         self.time = 1
+        self.bestMove = None
 
     def name(self):
         return "Simulation Player ({0} sim.)".format(self.numSimulations)
@@ -26,7 +27,7 @@ class SimulationPlayer(object):
     def genmove(self,moves,state,color):
         assert not state.endOfGame()
         moveNr = len(moves)
-        self.numSimulations = moveNr*150
+        self.numSimulations = moveNr*100
         if moveNr == 1:
             return moves[0]
 
@@ -50,11 +51,12 @@ class SimulationPlayer(object):
             self.count[self.preAction] +=1
             self.time += 1
 
-        highest_reward = max(self.avg_rewards.values())
-        for move in self.avg_rewards:
-            if self.avg_rewards[move] == highest_reward:
-                return move
+            highest_reward = max(self.avg_rewards.values())
+            for move in self.avg_rewards:
+                if self.avg_rewards[move] == highest_reward:
+                    self.bestMove = move
 
+        return self.bestMove
 
     def _choose_action(self):
         if 0 not in self.count.values():

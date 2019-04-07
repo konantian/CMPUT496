@@ -51,7 +51,6 @@ class SimulationPlayer(object):
             self.time += 1
 
         highest_reward = max(self.avg_rewards.values())
-        #print(sorted(self.count.items(),key=lambda x:x[1]))
         for move in self.avg_rewards:
             if self.avg_rewards[move] == highest_reward:
                 return move

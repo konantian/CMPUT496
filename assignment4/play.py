@@ -1,7 +1,7 @@
 import pexpect
 
-player1='gomoku4/Gomoku4.py'
-player2='JL/Gomoku4.py'
+player1='my_player/Gomoku4.py'
+player2='flat_mc_player/Gomoku3.py'
 
 win1=0
 win2=0
@@ -73,14 +73,17 @@ def playSingleGame(alternative=False):
         status=ob.after.decode("utf-8")[2:]
         if status=='black':
             result=1
+            print("Game %d"%(win1+win2+draw))
             print('black win')
             break
         elif status=='white':
             result=2
+            print("Game %d"%(win1+win2+draw))
             print('white win')
             break
         elif status=='draw':
             result=0
+            print("Game %d"%(win1+win2+draw))
             print('draw')
             break
         else:

@@ -458,8 +458,8 @@ class GtpConnection():
         block_dead_four = [move for move in set(block_dead_four) if block_dead_four.count(move) > 1]
 
         #print(double_dead_four)
-        move_types=["Win ","BlockWin ","OpenFour ","DoubleDeadFour","DeadFourOpenThree ","DoubleOpenThree","BlockOpenFour ","BlockDoubleDeadFour ","BlockDoubleThree","OpenThree ","Random "]
-        moves=[win_moves,block_win_moves,open_four_moves,double_dead_four,dead_four_open_three,double_open_three,block_open_four_moves,block_dead_four,block_open_three,open_three_moves,empty_moves]
+        move_types=["Win ","BlockWin ","OpenFour ","BlockOpenFour ","DoubleDeadFour","DeadFourOpenThree ","DoubleOpenThree","BlockDoubleDeadFour ","BlockDoubleThree","OpenThree ","Random "]
+        moves=[win_moves,block_win_moves,open_four_moves,block_open_four_moves,double_dead_four,dead_four_open_three,double_open_three,block_dead_four,block_open_three,open_three_moves,empty_moves]
         for i in range(len(move_types)):
             if moves[i]:
                 return move_types[i],moves[i]

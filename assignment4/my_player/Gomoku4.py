@@ -19,7 +19,6 @@ class SimulationPlayer(object):
         self.count = None
         self.c = 2
         self.time = 1
-        self.prob0 = 0.1
 
     def name(self):
         return "Simulation Player ({0} sim.)".format(self.numSimulations)

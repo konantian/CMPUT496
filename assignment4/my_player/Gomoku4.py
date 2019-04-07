@@ -19,6 +19,7 @@ class SimulationPlayer(object):
         self.count = None
         self.c = 2
         self.time = 1
+        self.bestMove = None
 
     def name(self):
         return "Simulation Player ({0} sim.)".format(self.numSimulations)
@@ -26,7 +27,7 @@ class SimulationPlayer(object):
     def genmove(self,moves,state,color):
         assert not state.endOfGame()
         moveNr = len(moves)
-        self.numSimulations = moveNr*150
+        self.numSimulations = moveNr*100
         if moveNr == 1:
             return moves[0]
 
@@ -34,28 +35,40 @@ class SimulationPlayer(object):
         self.moves = moves
         self.count = dict(zip(moves,[0]*moveNr))
         self.avg_rewards = dict(zip(moves,[0]*moveNr))
+
+        #agent start
         self.preAction = self._choose_action()
-        self.count[self.preAction] += 1
+        self.count[self.preAction] +=1
         self.time += 1
+        coord = move_to_coord(self.preAction,state.size)
+        point = coord_to_point(coord[0],coord[1],state.size)
+        copy_board = copy.deepcopy(state)
+        copy_board.play_move_gomoku(point,color)
+        reward = copy_board.mysimulate(color)
+        self.avg_rewards[self.preAction]+=((reward-self.avg_rewards[self.preAction])/self.count[self.preAction])
+        
+
+        highest_reward = max(self.avg_rewards.values())
+        for move in self.avg_rewards:
+            if self.avg_rewards[move] == highest_reward:
+                self.bestMove = move
 
         #agent step
         for _ in range(self.numSimulations):
+            self.preAction = self._choose_action()
+            self.count[self.preAction] +=1
+            self.time += 1
             coord = move_to_coord(self.preAction,state.size)
             point = coord_to_point(coord[0],coord[1],state.size)
             copy_board = copy.deepcopy(state)
             copy_board.play_move_gomoku(point,color)
             reward = copy_board.mysimulate(color)
             self.avg_rewards[self.preAction]+=((reward-self.avg_rewards[self.preAction])/self.count[self.preAction])
-            self.preAction = self._choose_action()
-            self.count[self.preAction] +=1
-            self.time += 1
-
-        highest_reward = max(self.avg_rewards.values())
-        #print(sorted(self.count.items(),key=lambda x:x[1]))
-        for move in self.avg_rewards:
-            if self.avg_rewards[move] == highest_reward:
-                return move
-
+            #update self.bestMove
+            if self.avg_rewards[self.preAction] > self.avg_rewards[self.bestMove]:
+                self.bestMove = self.preAction
+                
+        return self.bestMove
 
     def _choose_action(self):
         if 0 not in self.count.values():

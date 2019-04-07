@@ -7,7 +7,7 @@ win1=0
 win2=0
 numTimeout=0
 draw=0
-timeout = 5
+timeout = 60
 moves_dic={}
 
 def getMove(p,color):
@@ -117,5 +117,5 @@ def outputResult():
     print('player1 win',win1,'player2 win',win2,'draw',draw)
     #print(moves_dic)
 
-playGames(10)
+playGames(1)
 outputResult()

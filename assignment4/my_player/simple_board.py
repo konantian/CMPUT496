@@ -474,6 +474,23 @@ class SimpleGoBoard(object):
             return winner,i
         return EMPTY, i
 
+
+    def mysimulate(self,color):
+        i = 0
+        if not self.endOfGame():
+            allMoves = self.legalMoves()
+            random.shuffle(allMoves)
+            while not self.endOfGame() and i < len(allMoves):
+                self.play_move_gomoku(allMoves[i],self.current_player)
+                i += 1
+        win,winner = self.check_game_end_gomoku()
+        if win:
+            if winner == color:
+                return 1
+            else:
+                return -1
+        return 0
+
     def count(self,point,otherpoint,step):
 
         if self.get_color(point) != self.get_color(otherpoint):
@@ -633,19 +650,23 @@ class SimpleGoBoard(object):
         #print(direction)
         steps = [1,-1,self.NS,-self.NS]
         for i in range(len(steps)):
-            points.add(pointA+2*directions[i]['top'])
-            points.add(pointA+2*directions[i]['top']+directions[i]['right'])
-            points.add(pointA+2*directions[i]['top']+2*directions[i]['right'])
+            #points.add(pointA+2*directions[i]['top'])
+            #points.add(pointA+2*directions[i]['top']+directions[i]['right'])
+            #points.add(pointA+2*directions[i]['top']+2*directions[i]['right'])
             points.add(pointA+directions[i]['top']+directions[i]['right'])
-            points.add(pointA+directions[i]['top']+2*directions[i]['right'])
+            points.add(pointA+directions[i]['top']+directions[i]['left'])
+            #points.add(pointA+directions[i]['top']+2*directions[i]['right'])
             points.add(pointA+directions[i]['right'])
-            points.add(pointA+2*directions[i]['right'])
+            points.add(pointA+directions[i]['left'])
+            #points.add(pointA+2*directions[i]['right'])
             points.add(pointA+directions[i]['down'])
+            points.add(pointA+directions[i]['top'])
             points.add(pointA+directions[i]['down']+directions[i]['right'])
-            points.add(pointA+directions[i]['down']+2*directions[i]['right'])
-            points.add(pointA+2*directions[i]['down'])
-            points.add(pointA+2*directions[i]['down']+directions[i]['right'])
-            points.add(pointA+2*directions[i]['down']+2*directions[i]['right'])
+            points.add(pointA+directions[i]['down']+directions[i]['left'])
+            #points.add(pointA+directions[i]['down']+2*directions[i]['right'])
+            #points.add(pointA+2*directions[i]['down'])
+            #points.add(pointA+2*directions[i]['down']+directions[i]['right'])
+            #points.add(pointA+2*directions[i]['down']+2*directions[i]['right'])
 
         points = [point for point in points if self.get_color(point) == EMPTY]
         return points

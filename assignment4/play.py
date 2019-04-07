@@ -1,7 +1,7 @@
 import pexpect
 
-player1='my_player/Gomoku3.py'
-player2='mcts/Gomoku4.py'
+player1='gomoku4/Gomoku4.py'
+player2='JL/Gomoku4.py'
 
 win1=0
 win2=0
@@ -110,7 +110,7 @@ def playGames(numGame=10):
 def outputResult():
     global moves_dic
     print('player1 win',win1,'player2 win',win2,'draw',draw)
-    print(moves_dic)
+    #print(moves_dic)
 
-playGames()
+playGames(10)
 outputResult()

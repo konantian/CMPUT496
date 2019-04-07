@@ -1,7 +1,7 @@
 import pexpect
 
 player1='my_player/Gomoku4.py'
-player2='flat_mc_player/Gomoku3.py'
+player2='mcts/Gomoku4.py'
 
 win1=0
 win2=0
@@ -117,5 +117,5 @@ def outputResult():
     print('player1 win',win1,'player2 win',win2,'draw',draw)
     #print(moves_dic)
 
-playGames(1)
+playGames(10)
 outputResult()

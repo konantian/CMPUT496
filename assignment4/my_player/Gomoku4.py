@@ -26,7 +26,7 @@ class SimulationPlayer(object):
     def genmove(self,moves,state,color):
         assert not state.endOfGame()
         moveNr = len(moves)
-        self.numSimulations = moveNr*100
+        self.numSimulations = moveNr*150
         if moveNr == 1:
             return moves[0]
 

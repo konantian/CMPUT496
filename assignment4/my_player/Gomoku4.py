@@ -9,8 +9,8 @@ import numpy as np
 import copy
 
 class SimulationPlayer(object):
-    def __init__(self, numSimulations):
-        self.numSimulations = numSimulations
+    def __init__(self):
+        self.numSimulations = None
         self.name = "GomokuAssignment4"
         self.version = 2.0
         self.preAction = None
@@ -26,20 +26,21 @@ class SimulationPlayer(object):
 
     def genmove(self,moves,state,color):
         assert not state.endOfGame()
-        if len(moves) == 1:
+        moveNr = len(moves)
+        self.numSimulations = moveNr*100
+        if moveNr == 1:
             return moves[0]
-        #agen init
+
+        #agent init
         self.moves = moves
-        self.count = dict(zip(moves,[0]*len(moves)))
-        self.avg_rewards = dict(zip(moves,[0]*len(moves)))
-        #print(self.avg_rewards)
-        #agent start
+        self.count = dict(zip(moves,[0]*moveNr))
+        self.avg_rewards = dict(zip(moves,[0]*moveNr))
         self.preAction = self._choose_action()
         self.count[self.preAction] += 1
         self.time += 1
 
+        #agent step
         for _ in range(self.numSimulations):
-            #print(self.time)
             coord = move_to_coord(self.preAction,state.size)
             point = coord_to_point(coord[0],coord[1],state.size)
             copy_board = copy.deepcopy(state)
@@ -51,15 +52,13 @@ class SimulationPlayer(object):
             self.time += 1
 
         highest_reward = max(self.avg_rewards.values())
-        print(sorted(self.count.items(),key=lambda x:x[1]))
-       # print(collections.OrderedDict(self.avg_rewards))
+        #print(sorted(self.count.items(),key=lambda x:x[1]))
         for move in self.avg_rewards:
             if self.avg_rewards[move] == highest_reward:
                 return move
 
 
     def _choose_action(self):
-        #print(self.avg_rewards)
         if 0 not in self.count.values():
             temp = dict(zip(self.moves,[self.avg_rewards[i]+np.sqrt(np.log(self.time)/self.count[i])*self.c for i in self.moves]))
             greedy_actions = [x for x in temp if temp[x] == max(temp.values())]
@@ -103,7 +102,7 @@ def run():
     start the gtp connection and wait for commands.
     """
     board = SimpleGoBoard(7)
-    con = GtpConnection(SimulationPlayer(4000), board)
+    con = GtpConnection(SimulationPlayer(), board)
     con.start_connection()
 
 if __name__=='__main__':

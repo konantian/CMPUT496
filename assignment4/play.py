@@ -1,7 +1,7 @@
 import pexpect
 
 player1='my_player/Gomoku4.py'
-player2='mcts/Gomoku4.py'
+player2='gomoku4/Gomoku4.py'
 
 win1=0
 win2=0
